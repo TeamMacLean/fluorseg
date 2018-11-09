@@ -16,6 +16,6 @@ setup(
         "matplotlib >= 3.0.1",
         "numpy >= 1.5.3",
         "read-roi >= 1.4.2",
-        "pillow >- 5.3.0",
+        "pillow >= 5.3.0",
     ],
 )
