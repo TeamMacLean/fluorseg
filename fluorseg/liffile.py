@@ -60,6 +60,27 @@ def max_proj(image_list):
     '''returns a single maximum projected image from a list of images'''
     return np.maximum.reduce(image_list)
 
+def make_polygon_mask(roi, width, height):
+    polygon = list(zip(roi.x, roi.y))
+    img = Image.new('L', (width, height), 0)
+    ImageDraw.Draw(img).polygon(polygon, outline=1, fill=1)
+    return np.array(img)
+
+def make_oval_mask(roi, width, height):
+    ellipse = [roi.left, roi.top, roi.left + roi.width, roi.top + roi.height]
+    img = Image.new('L', (width, height), 0)
+    ImageDraw.Draw(img).ellipse(ellipse, outline=1, fill=1)
+    return np.array(img)
+
+def get_region_volume(image, roi):
+    width, height = image.shape
+    mask = None
+    if roi.type == "polygon":
+        mask = make_polygon_mask(roi, width, height)
+    elif roi.type == "oval":
+        mask = make_oval_mask(roi, width, height)
+    masked = image * mask
+    return masked.sum()
 
 class LIFFile:
     def __init__(self, path):
