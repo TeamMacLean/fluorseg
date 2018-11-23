@@ -5,6 +5,7 @@
 import os
 import ipywidgets as widgets
 import glob
+import re
 
 def GetLifList(path):
     """

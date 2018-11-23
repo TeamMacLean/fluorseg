@@ -2,7 +2,6 @@ import xml.etree.ElementTree as ET
 import javabridge
 import bioformats
 javabridge.start_vm(class_path=bioformats.JARS)
-from matplotlib import pyplot as plt
 import numpy as np
 from PIL import Image, ImageDraw
 
@@ -60,22 +59,22 @@ def max_proj(image_list):
     '''returns a single maximum projected image from a list of images'''
     return np.maximum.reduce(image_list)
 
-def make_polygon_mask(roi, width, height):
+def make_polygon_mask(roi, width, height, outline = 1, fill = 1):
     polygon = list(zip(roi.x, roi.y))
     img = Image.new('L', (width, height), 0)
-    ImageDraw.Draw(img).polygon(polygon, outline=1, fill=1)
+    ImageDraw.Draw(img).polygon(polygon, outline=outline, fill=fill)
     return np.array(img)
 
-def make_oval_mask(roi, width, height):
+def make_oval_mask(roi, width, height, outline = 1, fill = 1):
     ellipse = [roi.left, roi.top, roi.left + roi.width, roi.top + roi.height]
     img = Image.new('L', (width, height), 0)
-    ImageDraw.Draw(img).ellipse(ellipse, outline=1, fill=1)
+    ImageDraw.Draw(img).ellipse(ellipse, outline=outline, fill=fill)
     return np.array(img)
 
 def get_region_volume(image, roi):
     width, height = image.shape
     mask = None
-    if roi.type == "polygon":
+    if roi.type in ["polygon", "freehand"]:
         mask = make_polygon_mask(roi, width, height)
     elif roi.type == "oval":
         mask = make_oval_mask(roi, width, height)
@@ -89,7 +88,6 @@ class LIFFile:
         self.img_count = count_images(self.xml_root)
         self.image_xml_meta = get_image_xml_meta(self.xml_root)
         self.z_stack_count = [get_z_plane_count(el) for el in self.image_xml_meta]
-
         self.combined_channel_images = collect_images(path, self.img_count, self.z_stack_count)
         self.channel_one_images = [extract_channel_one(a) for a in self.combined_channel_images]
         self.channel_two_images = [extract_channel_two(a) for a in self.combined_channel_images]
