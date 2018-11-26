@@ -14,6 +14,9 @@ class Result:
         self.max_projects_channel_1 = []
         self.max_projects_channel_2 = []
 
+def rescale(img):
+    img *= (255.0 / img.max())
+    return img
 
 def extract_volumes_for_rois(dirpath):  # single lif file, many lif zips
     """returns volumes for both channels for all regions in all images in a liffile.requires a path
@@ -33,8 +36,8 @@ def extract_volumes_for_rois(dirpath):  # single lif file, many lif zips
         result.rois.append(roi_info)
         result.roi_file_paths.append(roifiles[i][1])
 
-        mp1 = max_projs_channel_one[i]
-        mp2 = max_projs_channel_two[i]
+        mp1 = rescale(max_projs_channel_one[i])
+        mp2 = rescale(max_projs_channel_two[i])
 
         result.max_projects_channel_1.append(mp1)
         result.max_projects_channel_2.append(mp2)
