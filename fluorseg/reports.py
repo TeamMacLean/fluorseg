@@ -3,6 +3,7 @@ from PIL import Image
 from io import BytesIO
 import base64
 from fluorseg import liffile
+from skimage.color import label2rgb
 
 def make_overlay_base64(img, roi):
     width, height = img.shape
@@ -54,10 +55,13 @@ class HtmlReport:
         <body>
         <h2> Report for image ''' + result.lif.path + '''</h2>
         '''
-        self.table = self.make_table(result)
+        if result.type == "regions":
+            self.table = self.make_roi_table(result)
+        elif result.type == "endosomes":
+            self.table = self.make_blob_table(result)
         self.footer = self.footer()
 
-    def make_table(self, result):
+    def make_roi_table(self, result):
         rows = []
         for i in range(result.lif.img_count):
             title = "<h3>{0}</h3>".format(result.roi_file_paths[i])
@@ -73,6 +77,17 @@ class HtmlReport:
             rows.append(img_row)
 
         return rows
+
+
+    def make_blob_table(self,result):
+        rows = []
+        for i in range(result.lif.img_count):
+            imgs = []
+            title = "<h3>Series {0}</h3>".format(i)
+            img_row = "<img src='" + make_overlay_base64(label2rgb(result.blobs_channel_1[i], image=rescale(result.max_projects_channel_1[i]))) + ""' />'""
+            rows.append(img_row)
+        return rows
+
 
     def footer(self):
         return "</body>"

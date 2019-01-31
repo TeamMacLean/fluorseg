@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='FluorSeg',
-    version='0.0.5dev',
+    version='0.0.7dev',
     packages=['fluorseg', 'fluorseg.test'],
     author='Dan MacLean',
     author_email='dan.maclean@tsl.ac.uk',
@@ -17,5 +17,7 @@ setup(
         "numpy >= 1.5.3",
         "read-roi >= 1.4.2",
         "pillow >= 5.3.0",
+        "scipy >= 1.1.0",
+        "scikit-image >= 0.14.1",
     ],
 )

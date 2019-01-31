@@ -4,6 +4,9 @@ import bioformats
 javabridge.start_vm(class_path=bioformats.JARS)
 import numpy as np
 from PIL import Image, ImageDraw
+from skimage.filters import sobel
+from skimage import morphology
+from scipy import ndimage as ndi
 
 
 def get_xml(path):
@@ -59,17 +62,20 @@ def max_proj(image_list):
     '''returns a single maximum projected image from a list of images'''
     return np.maximum.reduce(image_list)
 
+
 def make_polygon_mask(roi, width, height, outline = 1, fill = 1):
     polygon = list(zip(roi.x, roi.y))
     img = Image.new('L', (width, height), 0)
     ImageDraw.Draw(img).polygon(polygon, outline=outline, fill=fill)
     return np.array(img)
 
+
 def make_oval_mask(roi, width, height, outline = 1, fill = 1):
     ellipse = [roi.left, roi.top, roi.left + roi.width, roi.top + roi.height]
     img = Image.new('L', (width, height), 0)
     ImageDraw.Draw(img).ellipse(ellipse, outline=outline, fill=fill)
     return np.array(img)
+
 
 def get_region_volume(image, roi):
     width, height = image.shape
@@ -80,6 +86,27 @@ def get_region_volume(image, roi):
         mask = make_oval_mask(roi, width, height)
     masked = image * mask
     return masked.sum()
+
+
+def find_blobs(img, quantile = 0.99, min_size = 4):
+    cutoff = np.quantile(img, quantile)
+    mask = img > cutoff
+    masked = img * mask
+    markers = np.zeros_like(masked)
+    markers[masked == 0 ] = 1
+    markers[masked > cutoff ] = 2
+    elevation_map = sobel(masked)
+    segmentation = morphology.watershed(elevation_map, markers)
+    segmentation[segmentation == 1] = 0
+    labeled_bits, _ = ndi.label(segmentation)
+    no_small = morphology.remove_small_objects(labeled_bits, min_size)
+    return no_small
+
+
+def count_blobs(img):
+    _, count = ndi.label(img)
+    return(count)
+
 
 class LIFFile:
     def __init__(self, path):

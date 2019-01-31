@@ -37,8 +37,8 @@ often looks like this::
     plt.show()
 
     #get the maximum projection of each images z-stack for each image
-    max_projs_channel_one = [max_proj(z_stacks) for z_stacks in lif.channel_one_images]
-    max_projs_channel_two = [max_proj(z_stacks) for z_stacks in lif.channel_two_images]
+    max_projs_channel_one = [liffile.max_proj(z_stacks) for z_stacks in lif.channel_one_images]
+    max_projs_channel_two = [liffile.max_proj(z_stacks) for z_stacks in lif.channel_two_images]
 
     #plot the first max_proj
     plt.imshow(max_projs_channel_one[0], interpolation='nearest')
