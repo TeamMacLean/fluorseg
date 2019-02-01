@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name='FluorSeg',
-    version='0.0.17dev',
+    version='0.0.18dev',
     packages=['fluorseg', 'fluorseg.test'],
     author='Dan MacLean',
     author_email='dan.maclean@tsl.ac.uk',
