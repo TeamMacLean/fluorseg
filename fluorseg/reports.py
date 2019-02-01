@@ -83,7 +83,10 @@ class HtmlReport:
         rows = []
         for i in range(result.lif.img_count):
             title = "<h3>Series {0}</h3>".format(i + 1)
-            img_row = title + "<img src='" + make_base64(rescale(label2rgb(result.blobs_channel_1[i], image=result.max_projects_channel_1[i]))) + "' />"
+            img_row = title + "<img src='" + \
+                      make_base64(rescale(label2rgb(result.blobs_channel_1[i], image=result.max_projects_channel_1[i]))) + \
+                      "' />" + \
+                      "<img src='" + make_base64(rescale(result.max_projects_channel_1[i])) + "' />"
             rows.append(img_row)
         return rows
 
