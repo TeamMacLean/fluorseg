@@ -81,9 +81,9 @@ class HtmlReport:
 
     def make_blob_table(self,result):
         rows = []
-        for iin range(result.lif.img_count):
+        for i in range(result.lif.img_count):
             title = "<h3>Series {0}</h3>".format(i)
-            img_row = "<img src='" + make_overlay_base64(label2rgb(result.blobs_channel_1[i], image=rescale(result.max_projects_channel_1[i]))) + ""' />'""
+            img_row = title + "<img src='" + make_overlay_base64(label2rgb(result.blobs_channel_1[i], image=rescale(result.max_projects_channel_1[i]))) + ""' />'""
             rows.append(img_row)
         return rows
 
