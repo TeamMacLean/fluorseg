@@ -97,5 +97,5 @@ def region_csv(result):
 def blob_csv(result):
     csv = [["lif_file", "series", "channel_1_endosome_count"]]
     for i in range(result.lif.img_count):
-        csv.append([result.lif.path, str(i), result.blob_count_channel_1['']])
+        csv.append([result.lif.path, str(i), result.blob_count_channel_1[i]])
     return csv
