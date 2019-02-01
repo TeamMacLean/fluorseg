@@ -57,7 +57,7 @@ class HtmlReport:
         '''
         if result.type == "regions":
             self.table = self.make_roi_table(result)
-        elif result.type == "endosomes":
+        elif result.type == "blobs":
             self.table = self.make_blob_table(result)
         self.footer = self.footer()
 
