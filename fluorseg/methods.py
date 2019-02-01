@@ -73,7 +73,7 @@ def extract_small_blob_count(dirpath, quantile = 0.99, min_size = 4):
     lif = liffile.LIFFile(liffiles[0])
     result = Result(lif, type="endosomes")
     result.max_projects_channel_1 = [ liffile.max_proj(z_stacks) for z_stacks in lif.channel_one_images ]
-    result.blobs_channel_1 = [liffile.find_blobs(mp, quantile, min_size) for mp in result.max_projs_channel_1 ]
+    result.blobs_channel_1 = [liffile.find_blobs(mp, quantile, min_size) for mp in result.max_projects_channel_1 ]
     result.blob_count_channel_1 = [liffile.count_blobs(bi) for bi in result.blobs_channel_1 ]
     return result
 
