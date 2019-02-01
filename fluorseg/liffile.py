@@ -102,7 +102,7 @@ def find_blobs(img, quantile = 0.99, min_size = 4):
         labeled_bits, _ = ndi.label(segmentation)
         no_small = morphology.remove_small_objects(labeled_bits, min_size)
         return no_small
-    except:
+    except RuntimeError:
         return np.zeros_like(img)
 
 
