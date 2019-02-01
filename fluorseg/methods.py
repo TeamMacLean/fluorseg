@@ -5,7 +5,7 @@ from skimage.color import label2rgb
 
 class Result:
 
-    def __init__(self, lif, type = "regions"):
+    def __init__(self, lif, type="regions"):
         self.lif = lif
         self.rois = []
         self.type = type
@@ -71,7 +71,7 @@ def extract_small_blob_count(dirpath, quantile = 0.99, min_size = 4):
 
     liffiles = filebrowser.GetLifList(dirpath)
     lif = liffile.LIFFile(liffiles[0])
-    result = Result(lif, type="endosomes")
+    result = Result(lif, type="blobs")
     result.max_projects_channel_1 = [ liffile.max_proj(z_stacks) for z_stacks in lif.channel_one_images ]
     result.blobs_channel_1 = [liffile.find_blobs(mp, quantile, min_size) for mp in result.max_projects_channel_1 ]
     result.blob_count_channel_1 = [liffile.count_blobs(bi) for bi in result.blobs_channel_1 ]
@@ -97,5 +97,5 @@ def region_csv(result):
 def blob_csv(result):
     csv = (["lif_file", "series", "channel_1_endosome_count"])
     for i in range(result.lif.img_count):
-        csv.append([result.lif.path, i, result.blob_count_channel_1])
+        csv.append([result.lif.path, str(i), result.blob_count_channel_1])
     return csv
