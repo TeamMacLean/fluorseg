@@ -89,18 +89,21 @@ def get_region_volume(image, roi):
 
 
 def find_blobs(img, quantile = 0.99, min_size = 4):
-    cutoff = np.quantile(img, quantile)
-    mask = img > cutoff
-    masked = img * mask
-    markers = np.zeros_like(masked)
-    markers[masked == 0 ] = 1
-    markers[masked > cutoff ] = 2
-    elevation_map = sobel(masked)
-    segmentation = morphology.watershed(elevation_map, markers)
-    segmentation[segmentation == 1] = 0
-    labeled_bits, _ = ndi.label(segmentation)
-    no_small = morphology.remove_small_objects(labeled_bits, min_size)
-    return no_small
+    try:
+        cutoff = np.quantile(img, quantile)
+        mask = img > cutoff
+        masked = img * mask
+        markers = np.zeros_like(masked)
+        markers[masked == 0 ] = 1
+        markers[masked > cutoff ] = 2
+        elevation_map = sobel(masked)
+        segmentation = morphology.watershed(elevation_map, markers)
+        segmentation[segmentation == 1] = 0
+        labeled_bits, _ = ndi.label(segmentation)
+        no_small = morphology.remove_small_objects(labeled_bits, min_size)
+        return no_small
+    except:
+        return np.zeros_like(img)
 
 
 def count_blobs(img):
