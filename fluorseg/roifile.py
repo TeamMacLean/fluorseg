@@ -1,6 +1,7 @@
 from read_roi import read_roi_zip
 import re
 from fluorseg import filebrowser
+import sys
 
 class ROI:
     def __init__(self, r):
@@ -32,5 +33,8 @@ class ROIFile:
 def get_sorted_zipfile_list(dirpath):
     '''makes a sorted list of all roi.zips. Requires zips to be named with suffix SeriesXXX.zip'''
     zips = filebrowser.GetROIZIPList(dirpath)
-    series_ids = [int(re.search("Series(\d+)\.zip", i).group(1)) for i in zips]
-    return sorted(list(zip(series_ids, zips)))
+    if zips:
+        series_ids = [int(re.search(".*Series(\d+)\.zip", i).group(1)) for i in zips]
+        return sorted(list(zip(series_ids, zips)))
+    else:
+        return []

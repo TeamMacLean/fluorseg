@@ -4,6 +4,8 @@ from io import BytesIO
 import base64
 from fluorseg import liffile
 from skimage.color import label2rgb
+from skimage.measure import label
+import math
 
 def make_overlay_base64(img, roi):
     width, height = img.shape
@@ -23,10 +25,10 @@ def make_overlay_base64(img, roi):
 
 def make_base64(img):
     img = np.uint8(img)
-
+    h, w  = img.shape[0:2]
     buffer = BytesIO()
     final_img = Image.fromarray(img)
-    final_img = final_img.resize((200, 200))
+    final_img = final_img.resize( (math.floor(w / 2.0), math.floor(h / 2.0) ))
     final_img = final_img.quantize(method=2)
 
     final_img.save(buffer, format="PNG")
@@ -36,8 +38,8 @@ def make_base64(img):
 
 
 def rescale(img):
-    img *= (255.0 / img.max())
-    return img
+    new_img = img * (255 / img.max())
+    return new_img
 
 
 class HtmlReport:
@@ -80,15 +82,44 @@ class HtmlReport:
 
 
     def make_blob_table(self,result):
-        rows = []
-        for i in range(result.lif.img_count):
-            title = "<h3>Series {0}</h3>".format(i + 1)
-            img_row = title + "<img src='" + \
-                      make_base64(rescale(label2rgb(result.blobs_channel_1[i], image=result.max_projects_channel_1[i]))) + \
-                      "' />" + \
-                      "<img src='" + make_base64(rescale(result.max_projects_channel_1[i])) + "' />"
-            rows.append(img_row)
-        return rows
+        if result.rois:
+            rows = []
+            for i in range(result.lif.img_count):
+                title = "<h3>{0}</h3>".format(result.roi_file_paths[i])
+                base_64_imgs = []
+                base_64_imgs.append(
+                    make_base64(rescale(
+                        label2rgb(label(result.blobs_channel_1[i]),
+                                                                  image=result.max_projects_channel_1[i]
+                                          )
+                                )
+                                )
+                )
+
+                for j, r in enumerate(result.rois[i].rois):
+                    base_64_imgs.append( make_overlay_base64(rescale(result.max_projects_channel_1[i]), r) )
+
+                    # make channel
+
+                img_row = "<div>" + title + "<img src='" + "' /><img src='".join(base_64_imgs) + "'/></div>\n"
+                rows.append(img_row)
+
+            return rows
+
+        else:
+            rows = []
+            for i in range(result.lif.img_count):
+                title = "<h3>Series {0}</h3>".format(i + 1)
+                img_row = title + "<img src='" + \
+                          make_base64(rescale(label2rgb(label(result.blobs_channel_1[i]), image=result.max_projects_channel_1[i].astype('uint8')))) + \
+                          "' />" + \
+                        "<img src='" + make_base64(rescale(result.max_projects_channel_1[i])) + "' />"
+                if result.cell_area_masks_channel_1:
+                    b64_img = result.cell_area_masks_channel_1[i] * 255
+                    img_row += "<img src='" + make_base64(b64_img)  + "' />"
+                rows.append(img_row)
+            return rows
+
 
 
     def footer(self):

@@ -1,6 +1,7 @@
 from fluorseg import filebrowser
 from fluorseg import liffile
 from fluorseg import roifile
+import numpy as np
 from skimage.color import label2rgb
 
 class Result:
@@ -18,6 +19,9 @@ class Result:
         self.blob_count_channel_2 = []
         self.blobs_channel_1 = []
         self.blobs_channel_2 = []
+        self.cell_area_masks_channel_1 = []
+        self.cell_areas_channel_1 = []
+        self.qs = []
 
 
 def rescale(img):
@@ -62,7 +66,10 @@ def extract_volumes_for_rois(dirpath):  # single lif file, many lif zips
     return result
 
 
-def extract_small_blob_count(dirpath, quantile = 0.99, min_size = 4):
+def extract_small_blob_count(dirpath, quantile = 0.99,
+                             min_size = 4, guess_cell_area = False,
+                             guess_cell_area_min_i=30
+                             ):
     """returns images and blob counts for all images in a liffile. Requires a path to a directory containing one lif file.
 
     quantile = 0.99, the boundary of image intensity at which pixels are retained (ie top one percent of brightest pixels)
@@ -70,11 +77,34 @@ def extract_small_blob_count(dirpath, quantile = 0.99, min_size = 4):
     """
 
     liffiles = filebrowser.GetLifList(dirpath)
+
+    roifiles = roifile.get_sorted_zipfile_list(dirpath)
+
     lif = liffile.LIFFile(liffiles[0])
     result = Result(lif, type="blobs")
+
     result.max_projects_channel_1 = [ liffile.max_proj(z_stacks) for z_stacks in lif.channel_one_images ]
     result.blobs_channel_1 = [liffile.find_blobs(mp, quantile, min_size) for mp in result.max_projects_channel_1 ]
-    result.blob_count_channel_1 = [liffile.count_blobs(bi) for bi in result.blobs_channel_1 ]
+
+    if roifiles:
+        for i in range(lif.img_count):
+            roi_info = roifile.ROIFile(roifiles[i][1])
+            result.rois.append(roi_info)
+            result.roi_file_paths.append(roifiles[i][1])
+
+            blobs = []
+
+            for j,r in enumerate(roi_info.rois):
+                blobs.append(liffile.get_region_count(result.blobs_channel_1[i], r))
+
+            result.blob_count_channel_1.append(blobs)
+    else:
+        result.blob_count_channel_1 = [liffile.count_blobs(img) for img in result.blobs_channel_1]
+
+        if guess_cell_area:
+            result.cell_area_masks_channel_1 = [liffile.make_cell_area_mask(img, guess_cell_area_min_i, 255) for img in result.max_projects_channel_1]
+            result.cell_areas_channel_1 = [np.sum(mask) for mask in result.cell_area_masks_channel_1 ]
+
     return result
 
 def as_csv(result):
@@ -95,7 +125,16 @@ def region_csv(result):
 
 
 def blob_csv(result):
-    csv = [["lif_file", "series", "channel_1_endosome_count"]]
-    for i in range(result.lif.img_count):
-        csv.append([result.lif.path, str(i), result.blob_count_channel_1[i]])
-    return csv
+    if result.rois:
+        csv = [["lif_file", "region_file", "series", "region_index", "region_name", "region_endosome_count"]]
+        for i in range(result.lif.img_count):
+            rois = result.rois[i]
+            for j, r in enumerate(rois.rois):
+                csv.append([result.lif.path, result.roi_file_paths[i], i + 1, j + 1, r.name, result.blob_count_channel_1[i][j]])
+        return csv
+    else:
+        csv = [["lif_file",  "series", "channel_1_endosome_count", "cell_area"]]
+        for i in range(result.lif.img_count):
+            csv.append([result.lif.path, i + 1, result.blob_count_channel_1[i], result.cell_areas_channel_1[i] ])
+        return csv
+

@@ -77,15 +77,22 @@ def make_oval_mask(roi, width, height, outline = 1, fill = 1):
     return np.array(img)
 
 
-def get_region_volume(image, roi):
+def mask_with_roi(image, roi):
     width, height = image.shape
     mask = None
     if roi.type in ["polygon", "freehand"]:
         mask = make_polygon_mask(roi, width, height)
     elif roi.type == "oval":
         mask = make_oval_mask(roi, width, height)
-    masked = image * mask
+    return image * mask
+
+def get_region_volume(image, roi):
+    masked = mask_with_roi(image, roi)
     return masked.sum()
+
+def get_region_count(image, roi):
+    masked = mask_with_roi(image, roi)
+    return count_blobs(masked)
 
 
 def find_blobs(img, quantile = 0.99, min_size = 4):
@@ -101,6 +108,7 @@ def find_blobs(img, quantile = 0.99, min_size = 4):
         segmentation[segmentation == 1] = 0
         labeled_bits, _ = ndi.label(segmentation)
         no_small = morphology.remove_small_objects(labeled_bits, min_size)
+        no_small[no_small > 0] = 1
         return no_small
     except RuntimeWarning:
         return np.zeros_like(img)
@@ -109,6 +117,15 @@ def find_blobs(img, quantile = 0.99, min_size = 4):
 def count_blobs(img):
     _, count = ndi.label(img)
     return(count)
+
+
+def make_cell_area_mask(img, low_i, high_i):
+    img *= (255.0 / img.max())
+    mask = np.logical_and(img > low_i, img < high_i) * 1
+    mask = ndi.binary_fill_holes(mask).astype(int)
+    return mask
+
+
 
 
 class LIFFile:
