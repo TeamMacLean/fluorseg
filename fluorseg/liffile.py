@@ -54,7 +54,7 @@ def extract_channel_one(ndarray_list):
 
 
 def extract_channel_two(ndarray_list):
-    '''returns the first channel data from list of numpyndarrays '''
+    '''returns the second channel data from list of numpyndarrays '''
     return [a[:, :, 1] for a in ndarray_list]
 
 
