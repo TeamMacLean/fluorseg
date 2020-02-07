@@ -77,18 +77,28 @@ def make_oval_mask(roi, width, height, outline = 1, fill = 1):
     return np.array(img)
 
 
-def mask_with_roi(image, roi):
+def mask_with_roi(image, roi, binary = False):
     width, height = image.shape
     mask = None
     if roi.type in ["polygon", "freehand"]:
         mask = make_polygon_mask(roi, width, height)
     elif roi.type == "oval":
         mask = make_oval_mask(roi, width, height)
+    if binary:
+        return np.ones_like(image) * mask
     return image * mask
+
+def roi_area(image, roi):
+    return mask_with_roi(image, roi, binary=True).sum()
 
 def get_region_volume(image, roi):
     masked = mask_with_roi(image, roi)
     return masked.sum()
+
+def get_region_pixel_count(image, roi):
+    mask = mask_with_roi(image, roi, binary = True)
+    return mask.sum()
+
 
 def get_region_count(image, roi):
     masked = mask_with_roi(image, roi)

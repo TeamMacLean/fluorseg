@@ -1,8 +1,8 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='FluorSeg',
-    version='0.0.25dev',
+    version='0.0.26dev',
     packages=['fluorseg', 'fluorseg.test'],
     author='Dan MacLean',
     author_email='dan.maclean@tsl.ac.uk',
@@ -10,6 +10,7 @@ setup(
     license='LICENSE.txt',
     description="Segment regions from fluorescence images",
     long_description=open('README.txt').read(),
+    python_requires='>=3.6.7',
     install_requires=[
         "javabridge >= 1.0.14",
         "python-bioformats >= 1.5.2",

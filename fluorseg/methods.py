@@ -24,10 +24,11 @@ class Result:
         self.cell_area_masks_channel_1 = []
         self.cell_areas_channel_1 = []
         self.qs = []
+        self.roi_areas = []
 
 
 def rescale(img):
-    img *= (255.0 / img.max())
+    img = img * (255.0 / img.max())
     return img
 
 
@@ -44,16 +45,20 @@ def extract_volumes_for_rois(dirpath):  # single lif file, many lif zips
     max_projs_channel_one = [liffile.max_proj(z_stacks) for z_stacks in lif.channel_one_images]
     max_projs_channel_two = [liffile.max_proj(z_stacks) for z_stacks in lif.channel_two_images]
 
+
     for i in range(lif.img_count):
         roi_info = roifile.ROIFile(roifiles[i][1])
         result.rois.append(roi_info)
         result.roi_file_paths.append(roifiles[i][1])
 
-        mp1 = max_projs_channel_one[i]
-        mp2 = max_projs_channel_two[i]
-        scaled_mp1 = rescale(mp1)
-        scaled_mp2 = rescale(mp2)
-
+        unscaled_mp1 = max_projs_channel_one[i]
+        unscaled_mp2 = max_projs_channel_two[i]
+#        print("unscaled")
+#        print(unscaled_mp1.sum())
+        scaled_mp1 = rescale(unscaled_mp1)
+        scaled_mp2 = rescale(unscaled_mp2)
+#        print("scaled")
+#        print(scaled_mp1.sum())
         result.max_projects_channel_1.append(scaled_mp1)
         result.max_projects_channel_2.append(scaled_mp2)
 
@@ -63,18 +68,25 @@ def extract_volumes_for_rois(dirpath):  # single lif file, many lif zips
         vols1 = []
         vols2 = []
 
+        areas = []
+
+
         for r in roi_info.rois:
-            unscaled_vols1.append(liffile.get_region_volume(mp1, r))
-            unscaled_vols2.append(liffile.get_region_volume(mp2, roi))
+            unscaled_vols1.append(liffile.get_region_volume(unscaled_mp1, r))
+            unscaled_vols2.append(liffile.get_region_volume(unscaled_mp2, r))
 
             vols1.append(liffile.get_region_volume(scaled_mp1, r))
             vols2.append(liffile.get_region_volume(scaled_mp2, r))
 
+            areas.append(liffile.roi_area(unscaled_mp1,r))
+#        print(vols1)
         result.volumes_channel_1.append(vols1)
         result.volumes_channel_2.append(vols2)
-        result.unscaled_volumes_chanel_1.append(unscaled_vols1)
+#        print(result.volumes_channel_2)
+        result.unscaled_volumes_channel_1.append(unscaled_vols1)
         result.unscaled_volumes_channel_2.append(unscaled_vols2)
 
+        result.roi_areas.append(areas)
 
 
 
@@ -131,11 +143,11 @@ def as_csv(result):
 
 
 def region_csv(result):
-    csv = [["lif_file", "regions_file", "region_index", "region_name", "channel_1_region_volume", "channel_2_region_volume", "channel_1_unscaled_region_volume", "channel_2_unscaled_region_volume"]]
+    csv = [["lif_file", "regions_file", "region_index", "region_name", "channel_1_region_volume", "channel_2_region_volume", "channel_1_unscaled_region_volume", "channel_2_unscaled_region_volume", "region_area"]]
     for i in range(result.lif.img_count):
         rois = result.rois[i]
         for j, r in enumerate(rois.rois):
-            csv.append([result.lif.path, result.roi_file_paths[i], j + 1, r.name, result.volumes_channel_1[i][j], result.volumes_channel_2[i][j] ,result.unscaled_volumes_channel_1[i][j], result.unscaled_volumes_channel_2[i][j] ] )
+            csv.append([result.lif.path, result.roi_file_paths[i], j + 1, r.name, result.volumes_channel_1[i][j], result.volumes_channel_2[i][j], result.unscaled_volumes_channel_1[i][j], result.unscaled_volumes_channel_2[i][j], result.roi_areas[i][j] ] )
     return csv
 
 
