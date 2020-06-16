@@ -1,3 +1,11 @@
 .idea
 dist
 MANIFEST
+.DS_Store
+build/*
+fluorseg/.DS_Store
+*.pyc
+fluorseg/test/.DS_Store
+fluorseg/test/__pycache__/*
+fluorseg/__pycache__/*
+FluorSeg.egg-info/*
