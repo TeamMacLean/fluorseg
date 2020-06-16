@@ -8,7 +8,7 @@ from skimage.measure import label
 import math
 
 def make_overlay_base64(img, roi):
-    width, height = img.shape
+    height, width = img.shape
     mask = None
     if roi.type in ["polygon", "freehand"]:
         mask = liffile.make_polygon_mask(roi, width, height, outline=255, fill=255)

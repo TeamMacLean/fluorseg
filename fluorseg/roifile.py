@@ -32,7 +32,7 @@ class ROIFile:
 
 def get_sorted_zipfile_list(dirpath):
     '''makes a sorted list of all roi.zips. Requires zips to be named with suffix SeriesXXX.zip'''
-    zips = filebrowser.GetROIZIPList(dirpath)
+    zips = filebrowser.get_roi_zip_list(dirpath)
     if zips:
         series_ids = [int(re.search(".*Series(\d+)\.zip", i).group(1)) for i in zips]
         return sorted(list(zip(series_ids, zips)))

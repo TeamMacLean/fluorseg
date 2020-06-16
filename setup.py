@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='FluorSeg',
-    version='0.0.26dev',
+    version='0.0.3dev0001',
     packages=['fluorseg', 'fluorseg.test'],
     author='Dan MacLean',
     author_email='dan.maclean@tsl.ac.uk',

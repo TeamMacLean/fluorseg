@@ -1,13 +1,42 @@
-"""Module for implementing a rudimentary file chooser and file selection methods in Jupyter Notebooks
+"""
+FileBrowser
 
+A module for creating interactive file browser widgets in a Jupyter notebook
+
+Workflow Overview
+-----------------
+1. Create object
+2. Browse file interactively
+3. Extract path of selected file
+
+Basic Usage
+-----------
+1. Import module and create widget
+
+    .. highlight:: python
+    .. code-block:: python
+
+        import fluorseg as fs
+        f = fs.FileBrowser()
+        f.widget()
+
+2. Browse
+
+    ... interactively
+
+3. Extract path of selected file
+
+    .. highlight:: python
+    .. code-block:: python
+
+        f.path
 """
 
 import os
 import ipywidgets as widgets
 import glob
-import re
 
-def GetLifList(path):
+def get_lif_list(path):
     """
     Returns a list of files ending in *.lif in provided folder
 
@@ -19,7 +48,7 @@ def GetLifList(path):
     return glob.glob(path)
 
 
-def GetROIZIPList(path):
+def get_roi_zip_list(path):
     """
     Returns a list of files ending in *.zip in provided folder
 
@@ -29,6 +58,7 @@ def GetROIZIPList(path):
     """
     path += '/*.zip'
     return glob.glob(path)
+
 
 class FileBrowser(object):
     """ Implements an ipywidgets directory chooser.

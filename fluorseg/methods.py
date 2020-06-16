@@ -35,8 +35,7 @@ def rescale(img):
 def extract_volumes_for_rois(dirpath):  # single lif file, many lif zips
     """returns volumes for both channels for all regions in all images in a liffile.requires a path
     to a directory containing one lif file and many roi.zip (one for each series). """
-
-    liffiles = filebrowser.GetLifList(dirpath)
+    liffiles = filebrowser.get_lif_list(dirpath)
     roifiles = roifile.get_sorted_zipfile_list(dirpath)
 
     lif = liffile.LIFFile(liffiles[0])
@@ -103,7 +102,7 @@ def extract_small_blob_count(dirpath, quantile = 0.99,
     min_size = 4,  the size of the smallest object to keep
     """
 
-    liffiles = filebrowser.GetLifList(dirpath)
+    liffiles = filebrowser.get_lif_list(dirpath)
 
     roifiles = roifile.get_sorted_zipfile_list(dirpath)
 
